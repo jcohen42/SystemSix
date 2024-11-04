@@ -3,16 +3,19 @@ import locale
 import random
 import schedule
 import time
-USE_EINK_DISPLAY = True  # Set to False to (test) build on a machine without an e-ink display.
+USE_EINK_DISPLAY = False  # Set to False to (test) build on a machine without an e-ink display.
 if USE_EINK_DISPLAY:
     import lib.epd5in83_V2 as eInk
     from eink_utils import *
 from calendar_module import get_events
 from desktop_render import *
 from weather_module import get_weather_forecast
-from settings import TRASH_DAY, LOCALE
+from settings import TRASH_DAY, LOCALE, REFRESH_SECONDS, RUN_ONCE
 
 DEBUG = False
+
+WIDTH = 1024
+HEIGHT = 768
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"),
                     handlers=[logging.FileHandler(filename="info.log", mode='w'), logging.StreamHandler()])
@@ -90,7 +93,6 @@ window_icons = None
 accessory_index = 0
 cursor_origin = None
 
-
 def is_trash_day(day: datetime):
     if TRASH_DAY is None:
         return False
@@ -158,6 +160,31 @@ def adornments_for_index(index: int):
         return ["cairo_7.bmp", "cairo_8.bmp"]
 
 
+"""
+LAYOUT A: (most common)
+* 3x2 icon window
+* Scrapbook w/ weather
+* Calendar list window
+* Moon phase
+    * Only display the Moon desk accessory from evening to morning
+    * If it's daytime a new moon, show calculator or puzzle
+
+LAYOUT B:
+* Paint window
+* Scrapbook w/ weather
+* Calendar list window
+* Moon phase (same logic as A)
+
+LAYOUT C:
+* Write window
+* Scrapbook w/ weather
+* Calendar list window
+* Moon phase
+    * Only display the Moon desk accessory from evening to morning
+    * If it's daytime a new moon, show nothing
+"""
+
+
 def new_layout_a():
     global startup_flavor
     global adornment_flavor
@@ -171,7 +198,7 @@ def new_layout_a():
     window_flavor = weighted_random_window_flavor()
     window_icons = random.sample(icon_list_for_index(window_flavor), 6)
     accessory_index = random.randrange(2)
-    cursor_origin = (random.randrange(610) + 20, random.randrange(434) + 16)
+    cursor_origin = (random.randrange(WIDTH) + 20, random.randrange(HEIGHT) + 16)
 
 
 def new_layout_b():
@@ -183,7 +210,7 @@ def new_layout_b():
     startup_flavor = random.randrange(2)
     adornment_flavor = random.randrange(5)
     accessory_index = random.randrange(2)
-    cursor_origin = (random.randrange(610) + 20, random.randrange(434) + 16)
+    cursor_origin = (random.randrange(WIDTH) + 20, random.randrange(HEIGHT) + 16)
 
 
 def new_layout_c():
@@ -197,7 +224,7 @@ def new_layout_c():
     adornment_flavor = random.randrange(5)
     window_flavor = weighted_random_window_flavor()
     window_icons = random.sample(icon_list_for_index(window_flavor), 6)
-    cursor_origin = (random.randrange(610) + 20, random.randrange(434) + 16)
+    cursor_origin = (random.randrange(WIDTH) + 20, random.randrange(HEIGHT) + 16)
 
 
 def render_layout_a(ink_draw: ImageDraw, ink_image: Image, day: datetime, period: str):
@@ -223,28 +250,25 @@ def render_layout_a(ink_draw: ImageDraw, ink_image: Image, day: datetime, period
     draw_trash(ink_image, is_trash_day(day))
 
     # Draw a window with icons (3 x 2 icons).
-    draw_3_2_window(ink_image, (400, 92), window_flavor, window_icons, False)
+    draw_3_2_window(ink_image, (554, 302), window_flavor, window_icons, False)
 
     # Draw the Scrapbook with weather data.
     date_str = datetime.strftime(day, "%A, %B %-d, %Y")
     adornments = adornments_for_index(adornment_flavor)
-    draw_scrapbook(ink_draw, ink_image, (24, 40), date_str, adornments, weather_forecast, False)
+    draw_scrapbook(ink_draw, ink_image, (24, 64), date_str, adornments, weather_forecast, False)
 
     # Display Calendar data in a window in list view (maximum of 6 rows).
-    draw_list_window(ink_draw, ink_image, (165, 288), event_list)
+    draw_list_window(ink_draw, ink_image, (60, 456), event_list)
 
     # Optionally display the Moon desk accessory.
-    if not handle_display_moon(ink_image, (32, 322), day, period):
+    if not handle_display_moon(ink_image, (780, 96), day, period):
         if accessory_index == 0:
-            draw_puzzle_da(ink_image, (32, 332))
+            draw_puzzle_da(ink_image, (780, 96))
         else:
-            draw_calculator_da(ink_image, (32, 292))
+            draw_calculator_da(ink_image, (780, 90))
 
     # Cursor is displayed last, on top of everything else.
     draw_arrow_cursor(ink_image, cursor_origin)
-
-    # Draw bezel last to "crop" any content hanging outside desktop.
-    draw_image_plus_mask(ink_image, "bezel.bmp", "bezel_mask.bmp", (0, 0))
 
 
 def render_layout_b(ink_draw: ImageDraw, ink_image: Image, day: datetime, period: str):
@@ -271,23 +295,20 @@ def render_layout_b(ink_draw: ImageDraw, ink_image: Image, day: datetime, period
     draw_paint_window(ink_draw, ink_image, date_str)
 
     # Draw the Scrapbook with weather data.
-    draw_scrapbook(ink_draw, ink_image, (240, 90), None, None, weather_forecast, False)
+    draw_scrapbook(ink_draw, ink_image, (212, 64), None, None, weather_forecast, False)
 
     # Display Calendar data in a window in list view (maximum of 6 rows).
-    draw_list_window(ink_draw, ink_image, (34, 330), event_list)
+    draw_list_window(ink_draw, ink_image, (28, 456), event_list)
 
     # Optionally display the Moon desk accessory.
-    if not handle_display_moon(ink_image, (450, 330), day, period):
+    if not handle_display_moon(ink_image, (780, 426), day, period):
         if accessory_index == 0:
-            draw_puzzle_da(ink_image, (450, 332))
+            draw_puzzle_da(ink_image, (780, 426))
         else:
-            draw_calculator_da(ink_image, (450, 292))
+            draw_calculator_da(ink_image, (780, 420))
 
     # Cursor is displayed on top of everything else.
     draw_arrow_cursor(ink_image, cursor_origin)
-
-    # Draw bezel last to "crop" any content hanging outside desktop.
-    draw_image_plus_mask(ink_image, "bezel.bmp", "bezel_mask.bmp", (0, 0))
 
 
 def render_layout_c(ink_draw: ImageDraw, ink_image: Image, day: datetime, period: str):
@@ -319,16 +340,13 @@ def render_layout_c(ink_draw: ImageDraw, ink_image: Image, day: datetime, period
     draw_write_window(ink_draw, ink_image, date_str, weather_forecast, False)
 
     # Display Calendar data in a window in list view (maximum of 6 rows).
-    draw_list_window(ink_draw, ink_image, (34, 306), event_list)
+    draw_list_window(ink_draw, ink_image, (34, 450), event_list)
 
     # Optionally display the Moon desk accessory.
-    handle_display_moon(ink_image, (506, 92), day, period)
+    handle_display_moon(ink_image, (786, 412), day, period)
 
     # Cursor is displayed on top of everything else.
     draw_arrow_cursor(ink_image, cursor_origin)
-
-    # Draw bezel last to "crop" any content hanging outside desktop.
-    draw_image_plus_mask(ink_image, "bezel.bmp", "bezel_mask.bmp", (0, 0))
 
 
 def update_display(period: str):
@@ -337,7 +355,7 @@ def update_display(period: str):
 
     try:
         # Prepare image and drawing context.
-        ink_image = Image.new(mode="RGBA", size=(648, 480), color='white')
+        ink_image = Image.new(mode="RGBA", size=(WIDTH, HEIGHT), color='white')
         ink_draw = ImageDraw.Draw(ink_image)
 
         # Render the Desktop to image.
@@ -467,10 +485,12 @@ def update_or_start(start: bool = False):
     global weather_succeeded
     global calendar_succeeded
 
-    # Get the hour, we'll do the appropriate update based on the hour.
+    # Get the hour & minute, we'll do the appropriate update based on the hour.
+    # TODO: Update based on minute
     today = datetime.now()
     hour = today.hour
-    logger.info('systemsix.update_or_start(); update hour: {}.'.format(hour))
+    minute = today.minute
+    logger.info('systemsix.update_or_start(); update time: {}:{}.'.format(hour, minute))
 
     do_weather = False
     retry_weather = False
@@ -547,10 +567,11 @@ def main():
     update_or_start(True)
     
     # Schedule a call to update five minutes after every hour.
-    schedule.every().hour.at("05:00").do(update)
-    while True:
-        schedule.run_pending()
-        time.sleep(5)
+    if not RUN_ONCE:
+        schedule.every(REFRESH_SECONDS).seconds.do(update)
+        while True:
+            schedule.run_pending()
+            time.sleep(5)
     
 
 if __name__ == '__main__':

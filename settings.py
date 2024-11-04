@@ -10,3 +10,7 @@ TRASH_DAY = 1
 # See README.md on instructions to assign your WebDAV Calendar URL.
 WEBDAV_CALENDAR_URL = None
 WEBDAV_IS_APPLE = True
+
+# Frequency of display refresh in seconds
+REFRESH_SECONDS = 60
+RUN_ONCE = False

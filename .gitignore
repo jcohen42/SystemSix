@@ -9,3 +9,4 @@ settings.py
 info.log
 .idea/
 .DS_Store
+ignored/
