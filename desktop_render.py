@@ -17,9 +17,9 @@ ICONS_DIR = os.path.join(CURRENT_DIR, 'artwork', 'icons')
 MOONS_DIR = os.path.join(CURRENT_DIR, 'artwork', 'moons')
 ADORNMENTS_DIR = os.path.join(CURRENT_DIR, 'artwork', 'adornments')
 FONT_DIR = os.path.join(CURRENT_DIR, 'fonts')
-FONT_CHICAGO = ImageFont.truetype(os.path.join(FONT_DIR, 'ChiKareGo2.ttf'), 32)
-FONT_GENEVA_12 = ImageFont.truetype(os.path.join(FONT_DIR, 'Pixelva.ttf'), 32)
-FONT_GENEVA_9 = ImageFont.truetype(os.path.join(FONT_DIR, 'geneva_9.ttf'), 32)
+FONT_CHICAGO = ImageFont.truetype(os.path.join(FONT_DIR, 'ChiKareGo2.ttf'), 16)
+FONT_GENEVA_12 = ImageFont.truetype(os.path.join(FONT_DIR, 'Pixelva.ttf'), 16)
+FONT_GENEVA_9 = ImageFont.truetype(os.path.join(FONT_DIR, 'geneva_9.ttf'), 16)
 
 
 def title_image_for_index(index: int):
@@ -130,30 +130,29 @@ def draw_forecast(ink_draw: ImageDraw, origin: Tuple[int, ...], max_origin: Tupl
 
         # Today's forecast is more robust, longer. Allow two lines of text.
         if period['number'] == 2:
-            height_delta += 12
+            height_delta += 6
         
         if period['number'] <= 2:
             text = day_name + ": " + str(period['detailedForecast'])
             (text_wide, text_high) = ink_draw.multiline_textsize(text, font=FONT_GENEVA_9)
             if text_wide > max_width:
-                text = text_wrap(text, FONT_GENEVA_9, ink_draw, max_width, 64)
+                text = text_wrap(text, FONT_GENEVA_9, ink_draw, max_width, 32)
                 (text_wide, text_high) = ink_draw.multiline_textsize(text, font=FONT_GENEVA_9)
                 height_delta += (int(text_high / 9) - 1) * 14
         else:
             text = day_name + ': ' + str(period['temperature']) + '\u00b0' + period['temperatureUnit'] + ', ' + \
                    period['shortForecast']
             (text_wide, text_high) = ink_draw.multiline_textsize(text, font=FONT_GENEVA_9)
-            height_delta += int(text_high / 18) + 12
             if text_wide > max_width:
-                text = text_wrap(text, FONT_GENEVA_9, ink_draw, max_width, 24)
+                text = text_wrap(text, FONT_GENEVA_9, ink_draw, max_width, 12)
         ink_draw.text((origin[0], v_offset), text, font=FONT_GENEVA_9, fill=1)
 
         v_offset += height_delta
 
         # Draw a couple of horizontal lines to seperate today from future forecasts.
         if period['number'] == 2:
-            ink_draw.line((origin[0], v_offset - 18, max_origin[0] - 10, v_offset - 18), fill=1, width=2)
-            ink_draw.line((origin[0], v_offset - 14, max_origin[0] - 10, v_offset - 14), fill=1, width=2)
+            ink_draw.line((origin[0], v_offset - 9, max_origin[0] - 5, v_offset - 9), fill=1, width=1)
+            ink_draw.line((origin[0], v_offset - 7, max_origin[0] - 5, v_offset - 7), fill=1, width=1)
 
 
 # Draw the desktop.
@@ -165,33 +164,33 @@ def draw_desktop(ink_image: Image, filename: str):
 # Draw the trash can empty or full.
 def draw_trash(ink_image: Image, is_full: bool):
     if is_full:
-        draw_image_plus_mask(ink_image, "trash_full.bmp", "trash_full_mask.bmp", (914, 646))
+        draw_image_plus_mask(ink_image, "trash_full.bmp", "trash_full_mask.bmp", (457, 323))
     else:
-        draw_image_plus_mask(ink_image, "trash.bmp", "trash_mask.bmp", (914, 646))
+        draw_image_plus_mask(ink_image, "trash.bmp", "trash_mask.bmp", (457, 323))
 
 
 # Draw the startup disk icon (either black or white).
 def draw_startup_disk(ink_image: Image, is_black: bool):
     if is_black:
-        draw_image_plus_mask(ink_image, "systemsix_disk_black.bmp", "systemsix_disk_mask.bmp", (892, 56))
+        draw_image_plus_mask(ink_image, "systemsix_disk_black.bmp", "systemsix_disk_mask.bmp", (446, 28))
     else:
-        draw_image_plus_mask(ink_image, "systemsix_disk_white.bmp", "systemsix_disk_mask.bmp", (892, 56))
+        draw_image_plus_mask(ink_image, "systemsix_disk_white.bmp", "systemsix_disk_mask.bmp", (446, 28))
 
 
 # Draw the paint window at the specified origin.
 def draw_paint_window(ink_draw: ImageDraw, ink_image: Image, title_str: str):
-    draw_image_plus_mask(ink_image, "paint_window.bmp", "paint_window_mask.bmp", (20, 48))
+    draw_image_plus_mask(ink_image, "paint_window.bmp", "paint_window_mask.bmp", (10, 24))
 
     # Draw date string passed in.
     if title_str is not None:
         (text_wide, text_high) = ink_draw.multiline_textsize(title_str, font=FONT_CHICAGO)
-        x_offset = 50 + 540 - int(text_wide / 2)
-        ink_draw.text((x_offset, 74 + 8), title_str, font=FONT_CHICAGO, fill=1)
+        x_offset = 25 + 270 - int(text_wide / 2)
+        ink_draw.text((x_offset, 37 + 4), title_str, font=FONT_CHICAGO, fill=1)
 
 
 # Draw the write window at the specified origin.
 def draw_write_window(ink_draw: ImageDraw, ink_image: Image, title_str: str, forecast: list, enabled: bool):
-    origin = (4, 48)
+    origin = (2, 24)
     if enabled:
         draw_image_plus_mask(ink_image, "write_window.bmp", "write_window_mask.bmp", origin)
     else:
@@ -200,13 +199,13 @@ def draw_write_window(ink_draw: ImageDraw, ink_image: Image, title_str: str, for
     # Draw date string passed in.
     if title_str is not None:
         (text_wide, text_high) = ink_draw.multiline_textsize(title_str, font=FONT_CHICAGO)
-        x_offset = origin[0] + 508 - int(text_wide / 2)
-        ink_draw.rectangle((x_offset - 14, origin[1] + 2, x_offset + text_wide + 10, origin[1] + 34), fill="white")
-        ink_draw.text((x_offset, origin[1] + 6), title_str, font=FONT_CHICAGO, fill=1)
+        x_offset = origin[0] + 254 - int(text_wide / 2)
+        ink_draw.rectangle((x_offset - 7, origin[1] + 1, x_offset + text_wide + 150, origin[1] + 17), fill="white")
+        ink_draw.text((x_offset, origin[1] + 3), title_str, font=FONT_CHICAGO, fill=1)
 
     # Draw forecast.
     if forecast is not None:
-        draw_forecast(ink_draw, (origin[0] + 24, origin[1] + 172), (origin[0] + 970, origin[1] + 560), forecast)
+        draw_forecast(ink_draw, (origin[0] + 12, origin[1] + 86), (origin[0] + 485, origin[1] + 280), forecast)
 
 
 def draw_3_2_window(ink_image: Image, origin: Tuple[int, ...], index: int, icons: Tuple[str, ...], enabled: bool):
@@ -219,13 +218,13 @@ def draw_3_2_window(ink_image: Image, origin: Tuple[int, ...], index: int, icons
     title_image = title_image_for_index(index)
     if title_image is not None:
         (title_width, title_height) = title_image.size
-        h_offset = origin[0] + int((452 - title_width) / 2)
-        v_offset = origin[1] + 2
+        h_offset = origin[0] + int((226 - title_width) / 2)
+        v_offset = origin[1] + 1
         ink_image.paste(title_image, (h_offset, v_offset))
     
     # Draw icons from list.
-    icons_image = image_with_icons((416, 250), 3, 2, icons)
-    ink_image.paste(icons_image, (origin[0] + 2, origin[1] + 78))
+    icons_image = image_with_icons((208, 125), 3, 2, icons)
+    ink_image.paste(icons_image, (origin[0] + 1, origin[1] + 39))
 
 
 def draw_4_1_window(ink_image: Image, origin: Tuple[int, ...], icons: Tuple[str, ...], title_image: Image, enabled: bool):
@@ -237,13 +236,13 @@ def draw_4_1_window(ink_image: Image, origin: Tuple[int, ...], icons: Tuple[str,
     # Draw optional title bar image (maybe "Games" for example).
     if title_image is not None:
         title_width, title_height = title_image.size
-        h_offset = origin[0] + int((624 - title_width) / 2)
-        v_offset = origin[1] + 2
+        h_offset = origin[0] + int((312 - title_width) / 2)
+        v_offset = origin[1] + 1
         ink_image.paste(title_image, (h_offset, v_offset))
 
     # Draw icons.
-    icons_image = image_with_icons((588, 164), 4, 1, icons)
-    ink_image.paste(icons_image, (origin[0] + 2, origin[1] + 78))
+    icons_image = image_with_icons((294, 82), 4, 1, icons)
+    ink_image.paste(icons_image, (origin[0] + 1, origin[1] + 39))
 
 
 def draw_list_window(ink_draw: ImageDraw, ink_image: Image, origin: Tuple[int, ...], event_list: List[Event]):
@@ -251,32 +250,32 @@ def draw_list_window(ink_draw: ImageDraw, ink_image: Image, origin: Tuple[int, .
 
     # Indicate there are no calendar events.
     if (event_list is None) or (len(event_list) == 0):
-        ink_draw.text((origin[0] + 288, origin[1] + 168), "No calendar events.", font=FONT_GENEVA_9, fill=1)
+        ink_draw.text((origin[0] + 144, origin[1] + 84), "No calendar events.", font=FONT_GENEVA_9, fill=1)
         return
 
     # Iterate over events in list and display them.
-    v_offset = origin[1] + 84
+    v_offset = origin[1] + 44
     for event in event_list:
         # Draw tiny folder icon.
         folder = Image.open(os.path.join(ARTWORK_DIR, "folder_tiny.bmp"))
-        ink_image.paste(folder, (origin[0] + 12, v_offset - 1))
+        ink_image.paste(folder, (origin[0] + 6, v_offset - 1))
         
         # Draw event description (title).
-        ink_draw.text((origin[0] + 44, v_offset), event.summary, font=FONT_GENEVA_9, fill=1)
+        ink_draw.text((origin[0] + 22, v_offset), event.summary, font=FONT_GENEVA_9, fill=1)
         
         # Draw event date.
         event_date = event.start.date()
         if datetime.now().date() != event_date:
             if event.all_day:
-                ink_draw.text((origin[0] + 562, v_offset), event_date.strftime("%b %-d, (all day)"), font=FONT_GENEVA_9, fill=1)
+                ink_draw.text((origin[0] + 281, v_offset), event_date.strftime("%b %-d, (all day)"), font=FONT_GENEVA_9, fill=1)
             else:
-                ink_draw.text((origin[0] + 562, v_offset), event.start.strftime("%b %-d, %-I:%M %p"), font=FONT_GENEVA_9, fill=1)
+                ink_draw.text((origin[0] + 281, v_offset), event.start.strftime("%b %-d, %-I:%M %p"), font=FONT_GENEVA_9, fill=1)
         else:
             if event.all_day:
-                ink_draw.text((origin[0] + 562, v_offset), "(all day)", font=FONT_GENEVA_9, fill=1)
+                ink_draw.text((origin[0] + 281, v_offset), "(all day)", font=FONT_GENEVA_9, fill=1)
             else:
-                ink_draw.text((origin[0] + 562, v_offset), event.start.strftime("%-I:%M %p"), font=FONT_GENEVA_9, fill=1)
-        v_offset += 32
+                ink_draw.text((origin[0] + 281, v_offset), event.start.strftime("%-I:%M %p"), font=FONT_GENEVA_9, fill=1)
+        v_offset += 16
     
 
 # Draw the Moon Phase "desk accessory" at the specified origin.
@@ -287,7 +286,7 @@ def draw_moon_da(ink_image: Image, origin: Tuple[int, ...], phase: int):
     index = moon_image_for_phase(phase)
     filename = "moon" + str(index) + ".bmp"
     moon_image = Image.open(os.path.join(MOONS_DIR, filename))
-    ink_image.paste(moon_image, (origin[0] + 2, origin[1] + 38))
+    ink_image.paste(moon_image, (origin[0] + 1, origin[1] + 19))
 
 
 def handle_display_moon(ink_image: Image, origin: Tuple[int, ...], today: datetime, period: str):
@@ -324,7 +323,7 @@ def draw_key_caps_da(ink_draw: ImageDraw, ink_image: Image, origin: Tuple[int, .
 
     # Draw date string passed in.
     if date_str is not None:
-        ink_draw.text((origin[0] + 92, origin[1] + 64), date_str, font=FONT_CHICAGO, fill=1)
+        ink_draw.text((origin[0] + 46, origin[1] + 32), date_str, font=FONT_CHICAGO, fill=1)
     
 
 # Draw the "Scrapbook" window at the specified origin.
@@ -336,38 +335,37 @@ def draw_scrapbook(ink_draw: ImageDraw, ink_image: Image, origin: Tuple[int, ...
     scrapbook_mask = Image.open(os.path.join(ARTWORK_DIR, "scrapbook_mask.bmp")).convert("L")
     ink_image.paste(scrapbook, origin, scrapbook_mask)
 
-    v_offset = 80
+    v_offset = 40
 
     # Draw date string passed in. Render twice (offset to right by one pixel) for bold.
     if date_str is not None:
         (text_wide, text_high) = ink_draw.multiline_textsize(date_str, font=FONT_GENEVA_12)
-        ink_draw.text((origin[0] + 382 - int(text_wide / 2), origin[1] + 84), date_str, font=FONT_GENEVA_12, fill=1)
-        ink_draw.text((origin[0] + 384 - int(text_wide / 2), origin[1] + 84), date_str, font=FONT_GENEVA_12, fill=1)
+        ink_draw.text((origin[0] + 191 - int(text_wide / 2), origin[1] + 42), date_str, font=FONT_GENEVA_12, fill=1)
+        ink_draw.text((origin[0] + 192 - int(text_wide / 2), origin[1] + 42), date_str, font=FONT_GENEVA_12, fill=1)
 
-        v_offset = 130
+        v_offset = 65
 
     if forecast is None:
         memo_image = Image.open(os.path.join(ARTWORK_DIR, "memo.bmp"))
-        ink_image.paste(memo_image, (origin[0] + 164, origin[1] + 186))
+        ink_image.paste(memo_image, (origin[0] + 82, origin[1] + 93))
         return
 
     # Draw adornments passed in.
     if adornments is not None:
         left_adorn = Image.open(os.path.join(ADORNMENTS_DIR, adornments[0]))
         (image_width, image_height) = left_adorn.size
-        ink_image.paste(left_adorn, (origin[0] + 80, origin[1] + 96 - int(image_height / 2)))
+        ink_image.paste(left_adorn, (origin[0] + 40, origin[1] + 48 - int(image_height / 2)))
 
         right_adorn = Image.open(os.path.join(ADORNMENTS_DIR, adornments[1]))
         (image_width, image_height) = right_adorn.size
-        ink_image.paste(right_adorn, (origin[0] + 688 - image_width, origin[1] + 96 - int(image_height / 2)))
+        ink_image.paste(right_adorn, (origin[0] + 344 - image_width, origin[1] + 48 - int(image_height / 2)))
 
-        v_offset = 130
+        v_offset = 65
 
     # Draw forecast.
-    draw_forecast(ink_draw, (origin[0] + 50, origin[1] + v_offset), (origin[0] + 730, origin[1] + 400), forecast)
+    draw_forecast(ink_draw, (origin[0] + 25, origin[1] + v_offset), (origin[0] + 365, origin[1] + 200), forecast)
 
 
 # Draw the arrow cursor at origin.
-# Good range for origin: x (20 to 630), y (16 to 450)
 def draw_arrow_cursor(ink_image: Image, origin: Tuple[int, ...]):
     draw_image_plus_mask(ink_image, "arrow_cursor.bmp", "arrow_cursor_mask.bmp", origin)

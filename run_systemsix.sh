@@ -1,4 +1,6 @@
 #!/bin/bash
 cd $(dirname $0)
-eog --fullscreen INK_EXPORT.bmp
+sleep 10s
+eog --fullscreen INK_EXPORT.bmp &
 python3 ./systemsix.py
+wait

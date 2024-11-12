@@ -2,7 +2,7 @@ dateutil
 icalevents
 lxml
 numpy
-pillow
+pillow==9.5.0
 requests
 schedule
 vobject

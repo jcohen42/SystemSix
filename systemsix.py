@@ -14,8 +14,8 @@ from settings import TRASH_DAY, LOCALE, REFRESH_SECONDS, RUN_ONCE
 
 DEBUG = False
 
-WIDTH = 1024
-HEIGHT = 768
+WIDTH = 512
+HEIGHT = 384
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"),
                     handlers=[logging.FileHandler(filename="info.log", mode='w'), logging.StreamHandler()])
@@ -198,7 +198,7 @@ def new_layout_a():
     window_flavor = weighted_random_window_flavor()
     window_icons = random.sample(icon_list_for_index(window_flavor), 6)
     accessory_index = random.randrange(2)
-    cursor_origin = (random.randrange(WIDTH) + 20, random.randrange(HEIGHT) + 16)
+    cursor_origin = (random.randrange(WIDTH) + 10, random.randrange(HEIGHT) + 8)
 
 
 def new_layout_b():
@@ -210,7 +210,7 @@ def new_layout_b():
     startup_flavor = random.randrange(2)
     adornment_flavor = random.randrange(5)
     accessory_index = random.randrange(2)
-    cursor_origin = (random.randrange(WIDTH) + 20, random.randrange(HEIGHT) + 16)
+    cursor_origin = (random.randrange(WIDTH) + 10, random.randrange(HEIGHT) + 8)
 
 
 def new_layout_c():
@@ -224,7 +224,7 @@ def new_layout_c():
     adornment_flavor = random.randrange(5)
     window_flavor = weighted_random_window_flavor()
     window_icons = random.sample(icon_list_for_index(window_flavor), 6)
-    cursor_origin = (random.randrange(WIDTH) + 20, random.randrange(HEIGHT) + 16)
+    cursor_origin = (random.randrange(WIDTH) + 10, random.randrange(HEIGHT) + 8)
 
 
 def render_layout_a(ink_draw: ImageDraw, ink_image: Image, day: datetime, period: str):
@@ -250,22 +250,22 @@ def render_layout_a(ink_draw: ImageDraw, ink_image: Image, day: datetime, period
     draw_trash(ink_image, is_trash_day(day))
 
     # Draw a window with icons (3 x 2 icons).
-    draw_3_2_window(ink_image, (554, 302), window_flavor, window_icons, False)
+    draw_3_2_window(ink_image, (277, 151), window_flavor, window_icons, False)
 
     # Draw the Scrapbook with weather data.
     date_str = datetime.strftime(day, "%A, %B %-d, %Y")
     adornments = adornments_for_index(adornment_flavor)
-    draw_scrapbook(ink_draw, ink_image, (24, 64), date_str, adornments, weather_forecast, False)
+    draw_scrapbook(ink_draw, ink_image, (12, 32), date_str, adornments, weather_forecast, False)
 
     # Display Calendar data in a window in list view (maximum of 6 rows).
-    draw_list_window(ink_draw, ink_image, (60, 456), event_list)
+    draw_list_window(ink_draw, ink_image, (30, 228), event_list)
 
     # Optionally display the Moon desk accessory.
-    if not handle_display_moon(ink_image, (780, 96), day, period):
+    if not handle_display_moon(ink_image, (390, 48), day, period):
         if accessory_index == 0:
-            draw_puzzle_da(ink_image, (780, 96))
+            draw_puzzle_da(ink_image, (390, 48))
         else:
-            draw_calculator_da(ink_image, (780, 90))
+            draw_calculator_da(ink_image, (390, 45))
 
     # Cursor is displayed last, on top of everything else.
     draw_arrow_cursor(ink_image, cursor_origin)
@@ -295,17 +295,17 @@ def render_layout_b(ink_draw: ImageDraw, ink_image: Image, day: datetime, period
     draw_paint_window(ink_draw, ink_image, date_str)
 
     # Draw the Scrapbook with weather data.
-    draw_scrapbook(ink_draw, ink_image, (212, 64), None, None, weather_forecast, False)
+    draw_scrapbook(ink_draw, ink_image, (106, 32), None, None, weather_forecast, False)
 
     # Display Calendar data in a window in list view (maximum of 6 rows).
-    draw_list_window(ink_draw, ink_image, (28, 456), event_list)
+    draw_list_window(ink_draw, ink_image, (14, 228), event_list)
 
     # Optionally display the Moon desk accessory.
-    if not handle_display_moon(ink_image, (780, 426), day, period):
+    if not handle_display_moon(ink_image, (390, 213), day, period):
         if accessory_index == 0:
-            draw_puzzle_da(ink_image, (780, 426))
+            draw_puzzle_da(ink_image, (390, 213))
         else:
-            draw_calculator_da(ink_image, (780, 420))
+            draw_calculator_da(ink_image, (390, 210))
 
     # Cursor is displayed on top of everything else.
     draw_arrow_cursor(ink_image, cursor_origin)
@@ -333,17 +333,17 @@ def render_layout_c(ink_draw: ImageDraw, ink_image: Image, day: datetime, period
     draw_trash(ink_image, is_trash_day(day))
 
     # Draw a window with icons (3 x 2 icons).
-    draw_3_2_window(ink_image, (406, 226), window_flavor, window_icons, False)
+    draw_3_2_window(ink_image, (203, 113), window_flavor, window_icons, False)
 
     # Draw write window.
     date_str = datetime.strftime(day, "%A, %B %-d, %Y")
     draw_write_window(ink_draw, ink_image, date_str, weather_forecast, False)
 
     # Display Calendar data in a window in list view (maximum of 6 rows).
-    draw_list_window(ink_draw, ink_image, (34, 450), event_list)
+    draw_list_window(ink_draw, ink_image, (17, 225), event_list)
 
     # Optionally display the Moon desk accessory.
-    handle_display_moon(ink_image, (786, 412), day, period)
+    handle_display_moon(ink_image, (393, 206), day, period)
 
     # Cursor is displayed on top of everything else.
     draw_arrow_cursor(ink_image, cursor_origin)
