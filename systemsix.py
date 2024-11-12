@@ -375,8 +375,6 @@ def update_display(period: str):
             set_sleep(epd)
         else:
             ink_image.save("INK_EXPORT.bmp")
-            final_image = Image.open("INK_EXPORT.bmp")
-            final_image.show()
         
     except Exception as e:
         logger.warning(e)
