@@ -1,6 +1,7 @@
 # Edit this file to contain your personal settings. Below are just placeholder values.
 LOCALE = "en_US.UTF-8"
 
+# Location for weather
 LATITUDE = 41.2853
 LONGITUDE = -96.2050
 
@@ -12,5 +13,12 @@ WEBDAV_CALENDAR_URL = None
 WEBDAV_IS_APPLE = True
 
 # Frequency of display refresh in seconds
-REFRESH_SECONDS = 60
+REFRESH_SECONDS = 30
 RUN_ONCE = False
+
+# OneBusAway variables. API Key is required
+REPLACE_CALENDAR_WITH_BUS_SCHEDULE = True
+ONEBUSAWAY_API_KEY = None
+ONEBUSAWAY_STOP_IDS = [
+    "1_26510"
+]

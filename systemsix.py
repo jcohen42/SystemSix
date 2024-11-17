@@ -8,9 +8,10 @@ if USE_EINK_DISPLAY:
     import lib.epd5in83_V2 as eInk
     from eink_utils import *
 from calendar_module import get_events
+from oba_module import *
 from desktop_render import *
 from weather_module import get_weather_forecast
-from settings import TRASH_DAY, LOCALE, REFRESH_SECONDS, RUN_ONCE
+from settings import *
 
 DEBUG = False
 
@@ -84,7 +85,9 @@ today = None
 weather_forecast = None
 weather_succeeded = False
 event_list = None
+bus_list = None
 calendar_succeeded = False
+bus_succeeded = False
 layout_index = None
 startup_flavor = 0
 adornment_flavor = 0
@@ -230,6 +233,7 @@ def new_layout_c():
 def render_layout_a(ink_draw: ImageDraw, ink_image: Image, day: datetime, period: str):
     global weather_forecast
     global event_list
+    global bus_list
     global startup_flavor
     global adornment_flavor
     global window_flavor
@@ -257,8 +261,11 @@ def render_layout_a(ink_draw: ImageDraw, ink_image: Image, day: datetime, period
     adornments = adornments_for_index(adornment_flavor)
     draw_scrapbook(ink_draw, ink_image, (12, 32), date_str, adornments, weather_forecast, False)
 
-    # Display Calendar data in a window in list view (maximum of 6 rows).
-    draw_calendar_window(ink_draw, ink_image, (28, 256), event_list)
+    # Display Calendar/Bus data in a window in list view (maximum of 4 rows)
+    if REPLACE_CALENDAR_WITH_BUS_SCHEDULE:
+        draw_bus_window(ink_draw, ink_image, (28, 256), bus_list)
+    else:
+        draw_calendar_window(ink_draw, ink_image, (28, 256), event_list)
 
     # Optionally display the Moon desk accessory.
     if not handle_display_moon(ink_image, (390, 48), day, period):
@@ -274,6 +281,7 @@ def render_layout_a(ink_draw: ImageDraw, ink_image: Image, day: datetime, period
 def render_layout_b(ink_draw: ImageDraw, ink_image: Image, day: datetime, period: str):
     global weather_forecast
     global event_list
+    global bus_list
     global startup_flavor
     global accessory_index
     global cursor_origin
@@ -297,15 +305,18 @@ def render_layout_b(ink_draw: ImageDraw, ink_image: Image, day: datetime, period
     # Draw the Scrapbook with weather data.
     # draw_scrapbook(ink_draw, ink_image, (106, 32), None, None, weather_forecast, False)
 
-    # Display Calendar data in a window in list view (maximum of 6 rows).
-    draw_calendar_window(ink_draw, ink_image, (14, 256), event_list)
+    # Display Calendar/Bus data in a window in list view (maximum of 4 rows)
+    if REPLACE_CALENDAR_WITH_BUS_SCHEDULE:
+        draw_bus_window(ink_draw, ink_image, (14, 256), bus_list)
+    else:
+        draw_calendar_window(ink_draw, ink_image, (14, 256), event_list)
 
     # Optionally display the Moon desk accessory.
-    if not handle_display_moon(ink_image, (396, 144), day, period):
+    if not handle_display_moon(ink_image, (396, 120), day, period):
         if accessory_index == 0:
-            draw_puzzle_da(ink_image, (396, 144))
+            draw_puzzle_da(ink_image, (396, 120))
         else:
-            draw_calculator_da(ink_image, (396, 140))
+            draw_calculator_da(ink_image, (396, 120))
 
     # Cursor is displayed on top of everything else.
     draw_arrow_cursor(ink_image, cursor_origin)
@@ -314,6 +325,7 @@ def render_layout_b(ink_draw: ImageDraw, ink_image: Image, day: datetime, period
 def render_layout_c(ink_draw: ImageDraw, ink_image: Image, day: datetime, period: str):
     global weather_forecast
     global event_list
+    global bus_list
     global startup_flavor
     global window_flavor
     global window_icons
@@ -339,8 +351,11 @@ def render_layout_c(ink_draw: ImageDraw, ink_image: Image, day: datetime, period
     date_str = datetime.strftime(day, "%A, %B %-d, %Y")
     draw_write_window(ink_draw, ink_image, date_str, weather_forecast, False)
 
-    # Display Calendar data in a window in list view (maximum of 6 rows).
-    draw_calendar_window(ink_draw, ink_image, (17, 257), event_list)
+    # Display Calendar/Bus data in a window in list view (maximum of 4 rows)
+    if REPLACE_CALENDAR_WITH_BUS_SCHEDULE:
+        draw_bus_window(ink_draw, ink_image, (17, 257), bus_list)
+    else:
+        draw_calendar_window(ink_draw, ink_image, (17, 257), event_list)
 
     # Optionally display the Moon desk accessory.
     handle_display_moon(ink_image, (393, 206), day, period)
@@ -422,6 +437,19 @@ def new_calendar():
         calendar_succeeded = True
 
 
+def new_bus_schedule():
+    global bus_list
+    global bus_succeeded
+
+    # Get upcoming bus arrivals
+    bus_list = get_bus_schedule(4)
+    if bus_list is None:
+        logger.warning("systemsix.new_layout(); failed to get bus schedule.")
+        bus_succeeded = False
+    else:
+        logger.info("systemsix.new_layout(); fetch bus schedule successful.")
+        bus_succeeded = True
+
 def new_layout():
     global layout_index
 
@@ -482,6 +510,7 @@ def update_or_start(start: bool = False):
     global today
     global weather_succeeded
     global calendar_succeeded
+    global bus_client_succeeded
 
     # Get the hour & minute, we'll do the appropriate update based on the hour.
     # TODO: Update based on minute
@@ -497,12 +526,21 @@ def update_or_start(start: bool = False):
     do_new_layout = False
     do_update_display = False
 
+    # Initialize OBA client on start
+    if start or (not bus_client_succeeded):
+        bus_client_succeeded = initialize_oba_client()
+
     # Handle data updates in case of previous failures.
     if (not start) and (not weather_succeeded):
         do_weather = True
         retry_weather = True
 
-    if (not start) and (not calendar_succeeded):
+    if REPLACE_CALENDAR_WITH_BUS_SCHEDULE:
+        new_bus_schedule()
+        do_update_display = True
+        do_calendar = False
+        retry_calendar = False
+    elif (not start) and (not calendar_succeeded):
         do_calendar = True
         retry_calendar = True
 
@@ -538,7 +576,7 @@ def update_or_start(start: bool = False):
             do_update_display = True
             logger.info("systemsix.update_or_start(); got weather this time.")
 
-    if do_calendar:
+    if do_calendar and (not REPLACE_CALENDAR_WITH_BUS_SCHEDULE):
         new_calendar()
         if retry_calendar and calendar_succeeded:
             do_update_display = True

@@ -311,6 +311,53 @@ def draw_calendar_window(ink_draw: ImageDraw, ink_image: Image, origin: Tuple[in
         v_offset += 16
     
 
+def draw_bus_window(ink_draw: ImageDraw, ink_image: Image, origin: Tuple[int, ...], arrival_list):
+    draw_image_plus_mask(ink_image, "window_list_4.bmp", "window_list_4_mask.bmp", origin)
+
+    # Draw list title
+    image = Image.open(os.path.join(ARTWORK_DIR, "bus_schedule_title.bmp"))
+    ink_image.paste(image, (origin[0] + 146, origin[1] + 1))
+
+    # Draw Folder details
+    ink_draw.text((origin[0] + 22, origin[1] + 24), "Route", font=FONT_GENEVA_9, fill=1)
+    ink_draw.text((origin[0] + 60, origin[1] + 24), "Destination", font=FONT_GENEVA_9, fill=1)
+    draw_underlined_text(ink_draw, (origin[0] + 312, origin[1] + 24), "Arrives", FONT_GENEVA_9, fill=1)
+
+    # Indicate there are no bus arrivals
+    if (arrival_list is None) or (len(arrival_list) == 0):
+        ink_draw.text((origin[0] + 100, origin[1] + 66), "No bus arrivals in the next 20 minutes", font=FONT_GENEVA_9, fill=1)
+        return
+
+    # Iterate over events in list and display them.
+    v_offset = origin[1] + 44
+    for arrival in arrival_list:
+        # Draw bus icon for untracked buses, and "shiny" icon for tracked
+        if(arrival.predicted):
+            bus_icon = Image.open(os.path.join(ARTWORK_DIR, "bus_tracked.bmp"))
+            ink_image.paste(bus_icon, (origin[0] + 6, v_offset - 1))
+        else:
+            bus_icon = Image.open(os.path.join(ARTWORK_DIR, "bus.bmp"))
+            ink_image.paste(bus_icon, (origin[0] + 6, v_offset - 1))
+        
+        # Draw route name
+        ink_draw.text((origin[0] + 22, v_offset), arrival.route_short_name, font=FONT_GENEVA_9, fill=1)
+
+        # Draw route desination
+        ink_draw.text((origin[0] + 60, v_offset), arrival.trip_headsign, font=FONT_GENEVA_9, fill=1)
+        
+        # Draw minutes away
+        now = datetime.now()
+        arrival_epoch_time = arrival.predicted_arrival_time if arrival.predicted else arrival.scheduled_arrival_time
+        arrival_time = datetime.fromtimestamp(arrival_epoch_time / 1000)
+        min_away = int((arrival_time - now).total_seconds() / 60)
+        if(min_away == 0):
+            ink_draw.text((origin[0] + 312, v_offset), "NOW", font=FONT_GENEVA_9, fill=1)
+        else:
+            ink_draw.text((origin[0] + 312, v_offset), f"{min_away}min", font=FONT_GENEVA_9, fill=1)
+        
+        v_offset += 16
+
+
 # Draw the Moon Phase "desk accessory" at the specified origin.
 def draw_moon_da(ink_image: Image, origin: Tuple[int, ...], phase: int):
     draw_image_plus_mask(ink_image, "moon_da_window.bmp", "moon_da_window_mask.bmp", origin)
