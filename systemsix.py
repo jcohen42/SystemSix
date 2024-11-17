@@ -250,7 +250,7 @@ def render_layout_a(ink_draw: ImageDraw, ink_image: Image, day: datetime, period
     draw_trash(ink_image, is_trash_day(day))
 
     # Draw a window with icons (3 x 2 icons).
-    draw_3_2_window(ink_image, (277, 151), window_flavor, window_icons, False)
+    draw_3_1_window(ink_image, (277, 178), window_flavor, window_icons, False)
 
     # Draw the Scrapbook with weather data.
     date_str = datetime.strftime(day, "%A, %B %-d, %Y")
@@ -258,7 +258,7 @@ def render_layout_a(ink_draw: ImageDraw, ink_image: Image, day: datetime, period
     draw_scrapbook(ink_draw, ink_image, (12, 32), date_str, adornments, weather_forecast, False)
 
     # Display Calendar data in a window in list view (maximum of 6 rows).
-    draw_list_window(ink_draw, ink_image, (30, 228), event_list)
+    draw_calendar_window(ink_draw, ink_image, (28, 256), event_list)
 
     # Optionally display the Moon desk accessory.
     if not handle_display_moon(ink_image, (390, 48), day, period):
@@ -295,17 +295,17 @@ def render_layout_b(ink_draw: ImageDraw, ink_image: Image, day: datetime, period
     draw_paint_window(ink_draw, ink_image, date_str)
 
     # Draw the Scrapbook with weather data.
-    draw_scrapbook(ink_draw, ink_image, (106, 32), None, None, weather_forecast, False)
+    # draw_scrapbook(ink_draw, ink_image, (106, 32), None, None, weather_forecast, False)
 
     # Display Calendar data in a window in list view (maximum of 6 rows).
-    draw_list_window(ink_draw, ink_image, (14, 228), event_list)
+    draw_calendar_window(ink_draw, ink_image, (14, 256), event_list)
 
     # Optionally display the Moon desk accessory.
-    if not handle_display_moon(ink_image, (390, 213), day, period):
+    if not handle_display_moon(ink_image, (396, 144), day, period):
         if accessory_index == 0:
-            draw_puzzle_da(ink_image, (390, 213))
+            draw_puzzle_da(ink_image, (396, 144))
         else:
-            draw_calculator_da(ink_image, (390, 210))
+            draw_calculator_da(ink_image, (396, 140))
 
     # Cursor is displayed on top of everything else.
     draw_arrow_cursor(ink_image, cursor_origin)
@@ -333,14 +333,14 @@ def render_layout_c(ink_draw: ImageDraw, ink_image: Image, day: datetime, period
     draw_trash(ink_image, is_trash_day(day))
 
     # Draw a window with icons (3 x 2 icons).
-    draw_3_2_window(ink_image, (203, 113), window_flavor, window_icons, False)
+    draw_3_1_window(ink_image, (203, 140), window_flavor, window_icons, False)
 
     # Draw write window.
     date_str = datetime.strftime(day, "%A, %B %-d, %Y")
     draw_write_window(ink_draw, ink_image, date_str, weather_forecast, False)
 
     # Display Calendar data in a window in list view (maximum of 6 rows).
-    draw_list_window(ink_draw, ink_image, (17, 225), event_list)
+    draw_calendar_window(ink_draw, ink_image, (17, 257), event_list)
 
     # Optionally display the Moon desk accessory.
     handle_display_moon(ink_image, (393, 206), day, period)
@@ -413,7 +413,7 @@ def new_calendar():
     global calendar_succeeded
 
     # Get calendar events for the day.
-    event_list = get_events(6)
+    event_list = get_events(4)
     if event_list is None:
         logger.warning("systemsix.new_layout(); failed to get calendar events.")
         calendar_succeeded = False

@@ -71,6 +71,12 @@ def text_wrap(text, font, writing, max_width, max_height):
                 break
     return '\n'.join([' '.join(line) for line in lines])
 
+# Draw underlined text for titles
+def draw_underlined_text(ink_draw: ImageDraw, pos, text: str, font, **options):
+    twidth, theight = ink_draw.textsize(text, font=font)
+    lx, ly = pos[0], pos[1] + theight + 1
+    ink_draw.text(pos, text, font=font, **options)
+    ink_draw.line((lx, ly, lx + twidth, ly), **options)
 
 # Draw and image using a mask at the specified origin.
 def draw_image_plus_mask(ink_image: Image, image_name: str, mask_name: str, origin: Tuple[int, ...]):
@@ -185,7 +191,7 @@ def draw_paint_window(ink_draw: ImageDraw, ink_image: Image, title_str: str):
     if title_str is not None:
         (text_wide, text_high) = ink_draw.multiline_textsize(title_str, font=FONT_CHICAGO)
         x_offset = 25 + 270 - int(text_wide / 2)
-        ink_draw.text((x_offset, 37 + 4), title_str, font=FONT_CHICAGO, fill=1)
+        ink_draw.text((x_offset, 26), title_str, font=FONT_CHICAGO, fill=1)
 
 
 # Draw the write window at the specified origin.
@@ -227,6 +233,25 @@ def draw_3_2_window(ink_image: Image, origin: Tuple[int, ...], index: int, icons
     ink_image.paste(icons_image, (origin[0] + 1, origin[1] + 39))
 
 
+def draw_3_1_window(ink_image: Image, origin: Tuple[int, ...], index: int, icons: Tuple[str, ...], enabled: bool):
+    if enabled:
+        draw_image_plus_mask(ink_image, "window_3_1.bmp", "window_3_1_mask.bmp", origin)
+    else:
+        draw_image_plus_mask(ink_image, "window_3_1_disabled.bmp", "window_3_1_mask.bmp", origin)
+
+    # Draw optional title bar image (maybe "Games" for example).
+    title_image = title_image_for_index(index)
+    if title_image is not None:
+        (title_width, title_height) = title_image.size
+        h_offset = origin[0] + int((226 - title_width) / 2)
+        v_offset = origin[1] + 1
+        ink_image.paste(title_image, (h_offset, v_offset))
+    
+    # Draw icons from list.
+    icons_image = image_with_icons((208, 82), 3, 1, icons)
+    ink_image.paste(icons_image, (origin[0] + 1, origin[1] + 39))
+
+
 def draw_4_1_window(ink_image: Image, origin: Tuple[int, ...], icons: Tuple[str, ...], title_image: Image, enabled: bool):
     if enabled:
         draw_image_plus_mask(ink_image, "window_4_1.bmp", "window_4_1_mask.bmp", origin)
@@ -245,12 +270,20 @@ def draw_4_1_window(ink_image: Image, origin: Tuple[int, ...], icons: Tuple[str,
     ink_image.paste(icons_image, (origin[0] + 1, origin[1] + 39))
 
 
-def draw_list_window(ink_draw: ImageDraw, ink_image: Image, origin: Tuple[int, ...], event_list: List[Event]):
-    draw_image_plus_mask(ink_image, "window_list_6.bmp", "window_list_6_mask.bmp", origin)
+def draw_calendar_window(ink_draw: ImageDraw, ink_image: Image, origin: Tuple[int, ...], event_list: List[Event]):
+    draw_image_plus_mask(ink_image, "window_list_4.bmp", "window_list_4_mask.bmp", origin)
+
+    # Draw list title
+    image = Image.open(os.path.join(ARTWORK_DIR, "calendar_events_title.bmp"))
+    ink_image.paste(image, (origin[0] + 144, origin[1] + 1))
+
+    # Draw Folder details
+    ink_draw.text((origin[0] + 22, origin[1] + 24), "Name", font=FONT_GENEVA_9, fill=1)
+    draw_underlined_text(ink_draw, (origin[0] + 281, origin[1] + 24), "Date/Time", FONT_GENEVA_9, fill=1)
 
     # Indicate there are no calendar events.
     if (event_list is None) or (len(event_list) == 0):
-        ink_draw.text((origin[0] + 144, origin[1] + 84), "No calendar events.", font=FONT_GENEVA_9, fill=1)
+        ink_draw.text((origin[0] + 144, origin[1] + 52), "No calendar events.", font=FONT_GENEVA_9, fill=1)
         return
 
     # Iterate over events in list and display them.
