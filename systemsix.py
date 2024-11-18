@@ -102,7 +102,7 @@ def is_trash_day(day: datetime):
     elif day.isoweekday() == TRASH_DAY:
         return True
     else:
-        return random.randrange(7) == 0
+        return False
 
 
 # Since game icons (for example) are in abundance, we want to show a Games window more often.
@@ -244,6 +244,9 @@ def render_layout_a(ink_draw: ImageDraw, ink_image: Image, day: datetime, period
     # Draw the desktop.
     draw_desktop(ink_image, "desktop_plain.bmp")
 
+    # Draw current time
+    draw_time(ink_draw)
+
     # Draw the start-up disk.
     if startup_flavor == 0:
         draw_startup_disk(ink_image, True)
@@ -288,6 +291,9 @@ def render_layout_b(ink_draw: ImageDraw, ink_image: Image, day: datetime, period
 
     # Draw the desktop.
     draw_desktop(ink_image, "desktop_plain.bmp")
+
+    # Draw current time
+    draw_time(ink_draw)
 
     # Draw the start-up disk.
     if startup_flavor == 0:
@@ -334,6 +340,9 @@ def render_layout_c(ink_draw: ImageDraw, ink_image: Image, day: datetime, period
 
     # Draw the desktop.
     draw_desktop(ink_image, "desktop_plain.bmp")
+
+    # Draw current time
+    draw_time(ink_draw)
 
     # Draw the start-up disk.
     if startup_flavor == 0:
@@ -513,7 +522,6 @@ def update_or_start(start: bool = False):
     global bus_client_succeeded
 
     # Get the hour & minute, we'll do the appropriate update based on the hour.
-    # TODO: Update based on minute
     today = datetime.now()
     hour = today.hour
     minute = today.minute
@@ -527,7 +535,7 @@ def update_or_start(start: bool = False):
     do_update_display = False
 
     # Initialize OBA client on start
-    if start or (not bus_client_succeeded):
+    if REPLACE_CALENDAR_WITH_BUS_SCHEDULE and(start or (not bus_client_succeeded)):
         bus_client_succeeded = initialize_oba_client()
 
     # Handle data updates in case of previous failures.

@@ -78,6 +78,12 @@ def draw_underlined_text(ink_draw: ImageDraw, pos, text: str, font, **options):
     ink_draw.text(pos, text, font=font, **options)
     ink_draw.line((lx, ly, lx + twidth, ly), **options)
 
+# Draw current time in 12HR format
+def draw_time(ink_draw: ImageDraw):
+    now = datetime.now()
+    readable_time = now.strftime('%I:%M %p')
+    ink_draw.text((432, 2), readable_time, font=FONT_CHICAGO, fill=1)
+
 # Draw and image using a mask at the specified origin.
 def draw_image_plus_mask(ink_image: Image, image_name: str, mask_name: str, origin: Tuple[int, ...]):
     image = Image.open(os.path.join(ARTWORK_DIR, image_name))
