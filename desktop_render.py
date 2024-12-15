@@ -327,18 +327,26 @@ def draw_bus_window(ink_draw: ImageDraw, ink_image: Image, origin: Tuple[int, ..
     # Draw Folder details
     ink_draw.text((origin[0] + 22, origin[1] + 24), "Route", font=FONT_GENEVA_9, fill=1)
     ink_draw.text((origin[0] + 60, origin[1] + 24), "Destination", font=FONT_GENEVA_9, fill=1)
-    draw_underlined_text(ink_draw, (origin[0] + 312, origin[1] + 24), "Arrives", FONT_GENEVA_9, fill=1)
+    draw_underlined_text(ink_draw, (origin[0] + 300, origin[1] + 24), "Arrives", FONT_GENEVA_9, fill=1)
 
     # Indicate there are no bus arrivals
     if (arrival_list is None) or (len(arrival_list) == 0):
-        ink_draw.text((origin[0] + 100, origin[1] + 66), "No bus arrivals in the next 20 minutes", font=FONT_GENEVA_9, fill=1)
+        ink_draw.text((origin[0] + 100, origin[1] + 66), "No bus arrivals in the next 30 minutes", font=FONT_GENEVA_9, fill=1)
         return
-
-    # Iterate over events in list and display them.
-    v_offset = origin[1] + 44
+    
+    # Get unique bus lines arriving in the next 30 mminutes
+    bus_lines = {}
     for arrival in arrival_list:
+        lst = bus_lines.get(arrival.trip_headsign, [])
+        lst.append(arrival)
+        bus_lines[arrival.trip_headsign] = lst
+
+    # Iterate over arrivals for each bus line and display them
+    v_offset = origin[1] + 44
+    for line in bus_lines:
         # Draw bus icon for untracked buses, and "shiny" icon for tracked
-        if(arrival.predicted):
+        # Only the soonest bus is considred for "shiny" icon
+        if(bus_lines[line][0].predicted):
             bus_icon = Image.open(os.path.join(ARTWORK_DIR, "bus_tracked.bmp"))
             ink_image.paste(bus_icon, (origin[0] + 6, v_offset - 1))
         else:
@@ -346,20 +354,25 @@ def draw_bus_window(ink_draw: ImageDraw, ink_image: Image, origin: Tuple[int, ..
             ink_image.paste(bus_icon, (origin[0] + 6, v_offset - 1))
         
         # Draw route name
-        ink_draw.text((origin[0] + 22, v_offset), arrival.route_short_name, font=FONT_GENEVA_9, fill=1)
+        ink_draw.text((origin[0] + 22, v_offset), bus_lines[line][0].route_short_name, font=FONT_GENEVA_9, fill=1)
 
         # Draw route desination
-        ink_draw.text((origin[0] + 60, v_offset), arrival.trip_headsign, font=FONT_GENEVA_9, fill=1)
+        ink_draw.text((origin[0] + 60, v_offset), bus_lines[line][0].trip_headsign, font=FONT_GENEVA_9, fill=1)
         
-        # Draw minutes away
+        # Calculate minutes away, using predicted time when available
         now = datetime.now()
-        arrival_epoch_time = arrival.predicted_arrival_time if arrival.predicted else arrival.scheduled_arrival_time
-        arrival_time = datetime.fromtimestamp(arrival_epoch_time / 1000)
-        min_away = int((arrival_time - now).total_seconds() / 60)
-        if(min_away == 0):
-            ink_draw.text((origin[0] + 312, v_offset), "NOW", font=FONT_GENEVA_9, fill=1)
-        else:
-            ink_draw.text((origin[0] + 312, v_offset), f"{min_away}min", font=FONT_GENEVA_9, fill=1)
+        arrival_times = []
+        for arrival in bus_lines[line]:
+            arrival_epoch_time = arrival.predicted_arrival_time if arrival.predicted else arrival.scheduled_arrival_time
+            arrival_time = datetime.fromtimestamp(arrival_epoch_time / 1000)
+            min_away = int((arrival_time - now).total_seconds() / 60)
+            if(min_away == 0):
+                arrival_times.append("NOW")
+            else:
+                arrival_times.append(f"{min_away}min")
+        
+        # Display 2 arrival times maximum due to screen space constraints
+        ink_draw.text((origin[0] + 300, v_offset), ", ".join(arrival_times[:2]), font=FONT_GENEVA_9, fill=1)
         
         v_offset += 16
 

@@ -451,7 +451,7 @@ def new_bus_schedule():
     global bus_succeeded
 
     # Get upcoming bus arrivals
-    bus_list = get_bus_schedule(4)
+    bus_list = get_bus_schedule(8)
     if bus_list is None:
         logger.warning("systemsix.new_layout(); failed to get bus schedule.")
         bus_succeeded = False

@@ -31,7 +31,7 @@ def get_bus_schedule(max_number: int):
     try:
         arrivals = []
         for stop in ONEBUSAWAY_STOP_IDS:
-            response = client.arrival_and_departure.list(stop, minutes_before=0, minutes_after=20)
+            response = client.arrival_and_departure.list(stop, minutes_before=0, minutes_after=30)
             
             arrivals.extend(response.data.entry.arrivals_and_departures)
 
