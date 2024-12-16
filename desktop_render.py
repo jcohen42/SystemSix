@@ -343,6 +343,7 @@ def draw_bus_window(ink_draw: ImageDraw, ink_image: Image, origin: Tuple[int, ..
 
     # Iterate over arrivals for each bus line and display them
     v_offset = origin[1] + 44
+    lines_displayed = 0
     for line in bus_lines:
         # Draw bus icon for untracked buses, and "shiny" icon for tracked
         # Only the soonest bus is considred for "shiny" icon
@@ -376,6 +377,10 @@ def draw_bus_window(ink_draw: ImageDraw, ink_image: Image, origin: Tuple[int, ..
         
         v_offset += 16
 
+        # Display at most 4 lines so as not to escape the window
+        lines_displayed += 1
+        if(lines_displayed == 4):
+            break
 
 # Draw the Moon Phase "desk accessory" at the specified origin.
 def draw_moon_da(ink_image: Image, origin: Tuple[int, ...], phase: int):
