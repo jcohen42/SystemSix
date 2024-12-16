@@ -1,5 +1,5 @@
 <p align="center">
-<img width="212" src="https://github.com/jcohen42/SystemSix/blob/main/images/SystemSixLogo.png" alt="SystemSix">
+<img width="212" src="https://github.com/jcohen42/SystemSix/blob/main/documentation/SystemSixLogo.png" alt="SystemSix">
 </p>
 
 This project is a fork of [the original SystemSix](https://github.com/EngineersNeedArt/SystemSix), made by EngineersNeedArt. SystemSix is a "desk accessory" running on a Raspberry Pi. This project differs from the main repository in that it is intended to be run on an LCD display that can handle diplaying images at a resolution of 512 x 384. It also allows you to swap out the calendar list display with bus arrival times for your nearby bus stops using the OneBusAway API.
