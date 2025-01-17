@@ -37,6 +37,8 @@ If you are new to Python as I was: briefly, you pull down the sources and open `
 
 Hopefully the `requirements.txt` file covers the needed Python modules and you have no problems running SystemSix. (Hopefully too your Python environment already is pointing to Python3 and not an older Python implmentation.)
 
+You'll also need to install `feh` in order to display the image on your screen. You can do so by running `sudo apt install feh -y`. If you want to quit to the Desktop while SystemSix is running, simply click Q or Escape on your keyboard.
+
 BEWARE: The e-ink display functionality might be broken in this fork. In `systemsix.py`, there is a flag at the top: `USE_EINK_DISPLAY`. Set this to `False` and you can run `systemsix.py` in any environment, even without an e-ink display attached. The workflow for updating the e-ink display involves first creating the image that you want displayed. Most of the code in SystemSix is doing just that: creating the final image of the desktop. When you set `USE_EINK_DISPLAY` to `False` the final image is instead opened in your current OS environment, not sent to the e-ink driver. (On MacOS it is Preview that is launched to display the resulting image.)
 
 See the *Settings* section below on how to customize SystemSix and personalize it.
