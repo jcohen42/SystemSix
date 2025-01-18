@@ -25,3 +25,5 @@ ONEBUSAWAY_STOP_IDS = [
 
 # Determine whether to detect for objects using an IR sensor wired through GPIO
 DETECT_OBJECTS = False
+# Required for turning on the screen
+LOGGED_IN_USER = "pi"

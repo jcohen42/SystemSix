@@ -567,15 +567,18 @@ def update_or_start(start: bool = False):
         period = period_for_hour(hour)
 
     # Update is based on the period ("MORNING" sees the most change).
+    is_start_of_hour = minute == 0
     if period == "MIDNIGHT":
         do_update_display = True
     elif period == "MORNING":
-        do_weather = True
-        do_calendar = True
-        do_new_layout = True
+        if is_start_of_hour:
+            do_weather = True
+            do_calendar = True
+            do_new_layout = True
         do_update_display = True
     elif period == "EVENING":
-        do_calendar = True
+        if is_start_of_hour:
+            do_calendar = True
         do_update_display = True
     else:
         if do_weather or do_calendar:

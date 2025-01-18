@@ -5,6 +5,7 @@ import logging
 import subprocess
 import threading
 import RPi.GPIO as IO
+from settings import LOGGED_IN_USER
 
 
 logger = logging.getLogger('app')
@@ -27,7 +28,7 @@ def detect_objects_internal():
 
             if(lock is False):
                 logger.info("Obstacle detected. Turning on screen.")
-                subprocess.call('XAUTHORITY=~pi/.Xauthority DISPLAY=:0 xset dpms force on && xset -dpms && xset s off', shell=True)
+                subprocess.call(f"XAUTHORITY=~{LOGGED_IN_USER}/.Xauthority DISPLAY=:0 xset dpms force on && xset -dpms", shell=True)
                 lock = True
         else:
             IO.output(vcc_pin, False)
