@@ -16,6 +16,8 @@ This project is a fork of [the original SystemSix](https://github.com/EngineersN
 
 • Optionally replace calendar list with a list of live bus arrival times using the OneBusAway API. You must provide your own API key.
 
+• Optionally enable object detection with an IR sensor to automatically turn on the screen when an obstacle is detected.
+
 • Retrieves and displays the local weather forecast at the start of each day.
 
 • Current phase of the moon displayed. (New moon? Maybe you get a Calculator instead.)
@@ -69,6 +71,8 @@ To display your upcoming calendar events the settings and code are the same as t
 
 Figuring out my calendar URL turned out to be a challenge. In the end I had to create a new calendar in Apple's Calendar app and make sure to mark it as *public*. Then I found the sharing affordance in Calendar and "shared" the calendar with myself (I emailed it to myself). The link in the email contained the (150+ character) URL that I was then able to paste into `Settings.py`. Mine started out like this: `webcal://p97-caldav.icloud.com/published/2/NDYyNT....`.
 
-`REFRESH_SECONDS` determines how often SystemSix generates a new image. This is particularly userful for updating bus arrival times. If you don't want to display bus information, setting this value to~4 hours should suffice.
+`REFRESH_SECONDS` determines how often SystemSix generates a new image. This is particularly userful for updating bus arrival times. If you don't want to display bus information, setting this value to ~4 hours should suffice.
 
 If you'd rather display bus arrival times in [supported regions](https://onebusaway.org/onebusaway-deployments/) using OneBusAway, you must set `REPLACE_CALENDAR_WITH_BUS_SCHEDULE` to `True` and provide an API key. You can then supply any number of bus stop IDs in the `ONEBUSAWAY_STOP_IDS` list.
+
+If you have an Infrared sensor plugged into your Pi's GPIO pins, then enable `DETECT_OBJECTS`. This turns on the screen when an obstacle is detected. You may need to change the numbers for your VCC and output pins if yours are plugged into different headers.

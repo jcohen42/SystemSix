@@ -22,3 +22,6 @@ ONEBUSAWAY_API_KEY = None
 ONEBUSAWAY_STOP_IDS = [
     "1_26510"
 ]
+
+# Determine whether to detect for objects using an IR sensor wired through GPIO
+DETECT_OBJECTS = False

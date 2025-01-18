@@ -9,6 +9,7 @@ if USE_EINK_DISPLAY:
     from eink_utils import *
 from calendar_module import get_events
 from oba_module import *
+from object_detection_module import detect_objects
 from desktop_render import *
 from weather_module import get_weather_forecast
 from settings import *
@@ -535,8 +536,12 @@ def update_or_start(start: bool = False):
     do_update_display = False
 
     # Initialize OBA client on start
-    if REPLACE_CALENDAR_WITH_BUS_SCHEDULE and(start or (not bus_client_succeeded)):
+    if REPLACE_CALENDAR_WITH_BUS_SCHEDULE and (start or (not bus_client_succeeded)):
         bus_client_succeeded = initialize_oba_client()
+    
+    # Initialize detecting objects on start
+    if DETECT_OBJECTS and start:
+        detect_objects()
 
     # Handle data updates in case of previous failures.
     if (not start) and (not weather_succeeded):
