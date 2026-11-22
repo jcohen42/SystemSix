@@ -60,6 +60,13 @@ In order to install & run SystemSix at boot on your Raspberry Pi or other comput
 
 You can then run SystemSix automatically after rebooting your machine, or manually by running the `run_systemsix.sh` script. If you want to quit to the Desktop while SystemSix is displaying the image, simply click Q or Escape on your keyboard.
 
+If the Rasperry Pi taskbar is still showing when `feh` is displaying the image, you can configure it to autohide by adding two lines to `~/.config/wf-panel-pi.ini`:
+
+```
+autohide=true
+autohide_duration=500
+```
+
 BEWARE: The e-ink display functionality might be broken in this fork. In `systemsix.py`, there is a flag at the top: `USE_EINK_DISPLAY`. Set this to `False` and you can run `systemsix.py` in any environment, even without an e-ink display attached. The workflow for updating the e-ink display involves first creating the image that you want displayed. Most of the code in SystemSix is doing just that: creating the final image of the desktop. When you set `USE_EINK_DISPLAY` to `False` the final image is instead opened in your current OS environment, not sent to the e-ink driver. (On MacOS it is Preview that is launched to display the resulting image.)
 
 ### Settings

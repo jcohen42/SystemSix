@@ -3,9 +3,10 @@
 
 import logging
 import subprocess
+import time
 import threading
 import RPi.GPIO as IO
-from settings import LOGGED_IN_USER
+from settings import IS_WAYLAND, LOGGED_IN_USER
 
 
 logger = logging.getLogger('app')
@@ -28,11 +29,16 @@ def detect_objects_internal():
 
             if(lock is False):
                 logger.info("Obstacle detected. Turning on screen.")
-                subprocess.call(f"XAUTHORITY=~{LOGGED_IN_USER}/.Xauthority DISPLAY=:0 xset dpms force on && xset -dpms", shell=True)
+                if(IS_WAYLAND):
+                    subprocess.call(f"XAUTHORITY=~{LOGGED_IN_USER}/.Xauthority DISPLAY=:0 xset dpms force on && xset -dpms", shell=True)
+                else:
+                    subprocess.call("/usr/bin/wlr-randr --output HDMI-A-1 --on", shell=True)
                 lock = True
+                time.sleep(5)
         else:
             IO.output(vcc_pin, False)
             lock = False
+        time.sleep(0.1)
 
 def detect_objects():
     detector_thread = threading.Thread(target=detect_objects_internal, name="Object Detector")

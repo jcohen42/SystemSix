@@ -23,7 +23,9 @@ ONEBUSAWAY_STOP_IDS = [
     "1_26510"
 ]
 
-# Determine whether to detect for objects using an IR sensor wired through GPIO
+# Determine whether to detect for objects using an IR sensor wired through GPIO. Must enable screen blanking in order to work
 DETECT_OBJECTS = False
+# Whether the desktop environment is Wayland or labwc. If Wayland, LOGGED_IN_USER is also required
+IS_WAYLAND = False
 # Required for turning on the screen
 LOGGED_IN_USER = "pi"
