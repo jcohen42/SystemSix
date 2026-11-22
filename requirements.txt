@@ -1,9 +1,0 @@
-dateutil
-icalevents
-lxml
-numpy
-pillow==9.5.0
-requests
-schedule
-vobject
-onebusaway

@@ -35,31 +35,32 @@ I have my computer running on a 8" 1024 x 768 display, mounted using a 3D-printe
 
 ### Running
 
-If you are new to Python as I was: briefly, you pull down the sources and open `systemsix.py` in a Python IDE (example: Thonny, that generally comes pre-installed on the Raspberry Pi — on a desktop OS, PyCharm is a popular one). Then you *run* it.
+In order to install & run SystemSix at boot on your Raspberry Pi or other computer, follow these steps, either directly on the machine or via SSH:
 
-Hopefully the `requirements.txt` file covers the needed Python modules and you have no problems running SystemSix. (Hopefully too your Python environment already is pointing to Python3 and not an older Python implmentation.)
+1. Set up your locale: `sudo dpkg-reconfigure locales`. You must select the locale which matches your `LOCALE` in settings.py, for instance "en_US.UTF-8" for USA.
+2. Install the required dependencies through `apt`: `sudo apt install feh libjpeg-dev zlib1g-dev libfreetype6-dev -y`
+3. Set up the Python virtual environment: `python -m venv venv && source venv/bin/activate`.
+4. Install the required Python packages via pip.
+    1. Update pip itself: `python3 -m pip install --upgrade pip`.
+    2. Install dateutil: `pip install python-dateutil --upgrade`.
+    3. Install other packages which don't require special installation steps: `pip install icalevents lxml numpy requests schedule vobject onebusaway RPi.GPIO`.
+    4. Install Python Image Library: `python -m pip install --force-reinstall --upgrade --no-cache-dir pillow==9.5.0`. This one gave me the most headache, if it gives you issues try looking around on the internet for help.
+5. Configure your desktop envrionment to boot up SystemSix automatically after logging into the desktop environment.
+    1. Determine which desktop envionment you are running: `pgrep -l 'labwc|wayfire|Xorg'`.
+    2. If `wayfire`:
+        1. Create an autostart config: `nano ~/.config/wayfire.ini`.
+        2. In the file, type in the following, each on a separate line:
+            1. `[autostart]`
+            2. `systemsix=/home/pi/SystemSix/run_systemsix.sh`
+            3. `dpms_timeout=300` This block configures the screen to turn off after 300 seconds (5 minutes), feel free to change as desired.
+    3. If `labwc`: 
+        1. Create an autostart config: `nano ~/.config/labwc/autostart`.
+        2. In the file, type in: `/home/jake/SystemSix/run_systemsix.sh &`. The & at the end ensures that the script runs in the background.
+    4. This says that after logging in, the computer will run the shell script named `run_systemsix.sh` located at the path `/home/pi/SystemSix/`. Replace the user `pi` with your username if yours differs. If you pulled the files down somewhere else you will have a different path to the shell script file.
 
-You'll also need to install `feh` in order to display the image on your screen. You can do so by running `sudo apt install feh -y`. If you want to quit to the Desktop while SystemSix is running, simply click Q or Escape on your keyboard.
+You can then run SystemSix automatically after rebooting your machine, or manually by running the `run_systemsix.sh` script. If you want to quit to the Desktop while SystemSix is displaying the image, simply click Q or Escape on your keyboard.
 
 BEWARE: The e-ink display functionality might be broken in this fork. In `systemsix.py`, there is a flag at the top: `USE_EINK_DISPLAY`. Set this to `False` and you can run `systemsix.py` in any environment, even without an e-ink display attached. The workflow for updating the e-ink display involves first creating the image that you want displayed. Most of the code in SystemSix is doing just that: creating the final image of the desktop. When you set `USE_EINK_DISPLAY` to `False` the final image is instead opened in your current OS environment, not sent to the e-ink driver. (On MacOS it is Preview that is launched to display the resulting image.)
-
-See the *Settings* section below on how to customize SystemSix and personalize it.
-
-To dedicate a Raspberry Pi to run SystemSix headless, you can create an entry in the Wayfire config.
-
-In the Terminal app on a Raspberry Pi I entered:
-
-`nano ~/.config/wayfire.ini`
-
-This brings up a text editor in Terminal. Then I scrolled down to the bottom of the file and added these lines:
-
-```
-[autostart]
-systemsix = /home/pi/SystemSix/run_systemsix.sh
-dpms_timeout=300
-```
-
-This says that after logging in, the computer will run the shell script named `run_systemsix.sh` located at the path `/home/pi/SystemSix/`. Replace the user `pi` with your username if yours differs. If you pulled the files down somewhere else you will have a different path to the shell script file. The `dpms_timeout` block configures the screen to turn off after 300 seconds (5 minutes), feel free to change as desired.
 
 ### Settings
 
